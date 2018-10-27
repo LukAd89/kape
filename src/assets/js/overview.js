@@ -39,7 +39,7 @@ const fillCardsWithEmptySlots = () => {
 const setDragzoneHandlers = () => {
     $(".dragzone").on("dragstart", function(ev) {
         ev.originalEvent.dataTransfer.setData("text", ev.originalEvent.target.id);
-        $(ev.originalEvent.target).closest('ul').find('.emptyslot').parent().addClass("border-success");
+        $('.emptyslot').parent().addClass("border-success");
     });
 }
 
