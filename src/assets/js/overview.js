@@ -41,11 +41,18 @@ const onDrop = function(ev) {
     var dragID = ev.originalEvent.dataTransfer.getData("text");
     var dropID =  ev.originalEvent.target.id;
 
+    console.log(dragID);
+    console.log(dropID);
+
     if($(ev.originalEvent.target).hasClass('dropzone')){
         console.log("JOO");
         $('#' + dragID).appendTo($('#' + dropID));
     }else {
-        $('#' + dragID).appendTo($('.dropzone').has('#' + dropID));
+        //$('#' + dragID).appendTo($('.dropzone li').has('.emptyslot').first());
+        $('#' + dragID).appendTo($('#' + dropID).parent().parent().find('li').has('.emptyslot').first());
+        $('#' + dropID).parent().parent().find('div.emptyslot').first().remove();
+        //$('.dropzone li .e').has('.emptyslot').first().remove();
+        //$('#' + dragID).appendTo($('.dropzone').has('#' + dropID));
     }
 
 
