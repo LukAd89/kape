@@ -1,18 +1,23 @@
-//var reservationData;
-//var boxesData;
-var maxDates = 10;
-
-var reservationData = [{"ID": "1", "name": "laura", "boxID": "1"},{"ID": "2", "name": "finchen", "boxID": "2"}];
+var reservationData = [{"ID": "1", "name": "laura", "boxID": "101"},{"ID": "2", "name": "finchen", "boxID": "102"}];
 
 $(function () {
     init();
 });
 
 const init = async () => {
+    await setBoxsizes();
     await fillCardsWithReservations();
     await fillCardsWithEmptySlots();
-    setDragzoneHandlers();
-    setDropzoneHandlers();
+    await setDragzoneHandlers();
+    await setDropzoneHandlers();
+}
+
+const setBoxsizes = async () => {
+    var boxes = await database.getBoxes();
+
+    for(var i=0; i<boxes.length; i++){
+        $('#boxlist' + boxes[i]._id).data('size', boxes[i].size);
+    }
 }
 
 const fillCardsWithReservations = () => {
@@ -28,32 +33,34 @@ const fillCardsWithReservations = () => {
 }
 
 const fillCardsWithEmptySlots = () => {
-    var emptyslot = '<li class="list-group-item"><div class="emptyslot">-</div></li>';
-    for(var i=1; i<=$('.dropzone').length; i++){
-        for(var j=0; j< $('#boxlist' + i).data('size'); j++){
-            $('#boxlist' + i).append(emptyslot)
+    var emptyslot = '<li class="list-group-item"><div class="emptyslot">leer</div></li>';
+
+    $('.dropzone').each(function(){
+        for(var j=$(this).children('li').length; j<$(this).data('size'); j++){
+            $(this).append(emptyslot)
         }
-    }
+    });
 }
 
 const setDragzoneHandlers = () => {
     $(".dragzone").on("dragstart", function(ev) {
         ev.originalEvent.dataTransfer.setData("text", ev.originalEvent.target.id);
-        $('.emptyslot').parent().addClass("border-success");
+        $('.emptyslot').parent().css("background-color", "lightgreen");
+        //$('.emptyslot').parent().addClass("bg-success");
     });
 }
 
 const setDropzoneHandlers = () => {
     $(".dropzone")
         .on("dragenter", onDragEnter)
-        //.on("dragover", onDragOver)
+        .on("dragover", onDragOver)
         .on("dragleave", onDragLeave)
         .on("drop", onDrop);
 }
 
 const onDrop = function(ev) {
     ev.preventDefault();
-    $(this).removeClass("border-success");
+    $('.emptyslot').parent().css("background-color", "");
 
     //ev.originalEvent.target.appendChild(document.getElementById(data));
 
@@ -65,7 +72,7 @@ const onDrop = function(ev) {
     }
 
     var targetDropUL = $(ev.originalEvent.target).closest('ul');
-    $('#' + dragID).parent().append('<div class="emptyslot">-</div>');
+    $('#' + dragID).parent().append('<div class="emptyslot">leer</div>');
     $('#' + dragID).parent().appendTo($('#' + dragID).parent().parent());
     $('#' + dragID).appendTo(targetDropUL.find('li').has('.emptyslot').first());
     targetDropUL.find('div.emptyslot').first().remove();
@@ -90,18 +97,16 @@ const onDrop = function(ev) {
 
 const onDragOver = function(ev) {
     ev.preventDefault(); 
-    if(!$(this).hasClass("border-success")) 
-        $(this).addClass("border-success");
 };
 
 const onDragEnter = function(ev) {
     ev.preventDefault();
-    
 };
 
 const onDragLeave = function(ev) {
     ev.preventDefault();
-    $(ev.originalEvent.target).closest('ul').find('.emptyslot').parent().removeClass("border-success");
+    //$(ev.originalEvent.target).closest('ul').find('.emptyslot').parent().removeClass("border-success");
+    //$('.emptyslot').parent().removeClass("bg-success");
 };
 const reservationSlot = (reservation) => {
     return '<div id="' + reservation.ID + '" class="dragzone" draggable="true">' + reservation.name + '</div>';

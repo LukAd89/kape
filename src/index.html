@@ -8,6 +8,7 @@
       var customerData;
       var reservationData;
       var boxesData;
+      //global.database = require('./assets/js/datahandler.js');
     </script>
     <script>
       window.$ = window.jQuery = require('../node_modules/jquery/dist/jquery.min.js');
@@ -40,7 +41,7 @@
     <div class="container-fluid">
   
       <div class="row">
-        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+        <nav class="col-sm-1 d-none d-md-block bg-light sidebar">
           <div class="sidebar-sticky">
             <ul class="nav flex-column">
               <li class="nav-item">
@@ -87,8 +88,8 @@
           </div>
         </nav>
   
-        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
-          <div class="container" id="main-container">
+        <main role="main" class="col-md-11 ml-sm-auto col-lg-11 px-4">
+          <div class="container-fliud" id="main-container">
   
           </div>
         </main>
@@ -97,6 +98,6 @@
   </body>
   <script>
     require('./assets/js/menu.js');
-    var dataHandler = require('./assets/js/datahandler.js');
+    var database = require('./assets/js/datahandler.js');
   </script>
 </html>
