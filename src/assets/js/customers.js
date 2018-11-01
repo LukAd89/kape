@@ -8,30 +8,154 @@ $(function () {
     init();
 });
 
-function init() {
-    //loadCustomerData();
+const init = async () => {
+    var customerData = await database.getCustomers();
+    //var customerData = [{_id:0, prename:'lukas', lastname:'adrian'},{_id:1, prename:'bianca', lastname:'mielach'}]
+    await printCustomers(customerData);
+    //$("#customer-edit").hide();
+    setEditNavbarHandler();
+    setButtonHandlers();
+
+    $('#customer-edit-cat .card-body').html($('script[data-template="catform"]').html());
+    /*
     printAllCustomers();
     setEditButtonHandlers();
     setButtonHandlers();
-    $("#cust-edit").hide();
+    */
+};
+
+const printCustomers = async (customerData) => {
+    $('#customer-table tbody').html("");
+    var tableBody = "";
+    for(var i=0; i<customerData.length; i++){
+        var tempCustomer = customerData[i];
+        var tempCats = await database.getCats(tempCustomer._id);
+
+        var catString = "";
+        for(var j=0; j<tempCats.length; j++){
+            catString += (tempCats[j].name || "");
+        }
+
+        tableBody += "<tr><td onclick=alert('" + tempCustomer._id + "')>" + (tempCustomer.prename || "") +
+            "</td><td>" + (tempCustomer.lastname || "") + 
+            "</td><td>" + (tempCustomer.adress || "") +  (tempCustomer.zip || "") +  (tempCustomer.city || "") + 
+            "</td><td>" + catString + 
+            "</td></tr>";
+    }
+    $('#customer-table tbody').html(tableBody);
+};
+
+const setEditNavbarHandler = () =>{
+    $("#customer-edit .page-item").each(function() {
+        $(this).on("click", function(){
+            $("#customer-edit-" + $(this).parent().find(".active a").data("page")).hide();
+            $(this).parent().find(".active").removeClass("active");
+            $(this).addClass("active");
+            $("#customer-edit-" + $(this).parent().find(".active a").data("page")).show();
+            //$(".nav").find(".active").removeClass("active");
+            //$(this).addClass("active");
+
+            //hideAllSections();
+            //showSection($(this).attr("data-section"));
+        });
+    });
+}
+
+const saveCustomerData = async () => {
+    var formData = await $('#form-customer').serializeArray();
+    var newCustomerData = {};
+    var newCat1Data = {};
+    var newCat2Data = {};
+    var newCat3Data = {};
+
+    $(formData).each(function(index, obj){
+        if(obj.name !== "_id" || obj.value !== "")
+            newCustomerData[obj.name] = obj.value;
+    });
+
+    formData = $('#form-cat1').serializeArray();
+    $(formData).each(function(index, obj){
+        if(obj.name !== "_id" || obj.value !== "")
+            newCat1Data[obj.name] = obj.value;
+    });
+
+    formData = $('#form-cat2').serializeArray();
+    $(formData).each(function(index, obj){
+        if(obj.name !== "_id" || obj.value !== "")
+            newCat2Data[obj.name] = obj.value;
+    });
+
+    formData = $('#form-cat3').serializeArray();
+    $(formData).each(function(index, obj){
+        if(obj.name !== "_id" || obj.value !== "")
+            newCat3Data[obj.name] = obj.value;
+    });
+
+    if(newCustomerData._id){
+        await database.updateCustomer(newCustomerData);
+        await database.updateCat(newCat1Data);
+        await database.updateCat(newCat2Data);
+        await database.updateCat(newCat3Data);
+    } else {
+        var newID = (await database.insertCustomer(newCustomerData))._id;
+        newCat1Data.ownerid = newID;
+        await database.insertCat(newCat1Data);
+        newCat1Data.ownerid = newID;
+        await database.insertCat(newCat2Data);
+        newCat1Data.ownerid = newID;
+        await database.insertCat(newCat3Data);
+    }
+}
+
+const selectCatForm = (id) => {
+    alert(id);
+}
+
+const setButtonHandlers = () => {
+    $("#btn-newcustomer").on("click", function () {
+        //showEditModal(-1);
+        saveCustomerData();
+    });
+
+    $("#btn-cat-delete").on("click", function () {
+        if (confirm('Katze löschen?')) {
+            if($('#btn-group-cats').children().length > 1){
+                $('#btn-group-cats .active').remove();
+                selectCatForm($('#btn-group-cats').children().first().data("id"));
+            }
+        }
+    });
+
+    $("#btn-cat-add").on("click", function () {
+        if($('#btn-group-cats').children().length > 6 || $('#btn-group-cats').children().last().data('id') === '0'){
+            return;
+        }
+        $('#btn-group-cats').append($('<button/>',
+            {
+                text: 'Neue Katze',
+                type: 'button',
+                class: 'btn btn-outline-dark',
+                click: function () {
+                        $('#btn-group-cats .active').removeClass('active');
+                        selectCatForm($(this).data('id'));
+                        $(this).addClass('active');
+                    },
+                data: {id: '0'}
+            }
+        ));
+    });
+
+    $('#btn-group-cats button').on("click", function () {
+        $('#btn-group-cats .active').removeClass('active');
+        selectCatForm($(this).data('id'));
+        $(this).addClass('active');
+    });
 }
 
 /*function printAllCustomers(data) {
     document.getElementById("div1").innerHTML += data.customers[0];
     getCustomerData(data.customers[0]);
 }*/
-
-function loadCustomerData() {
-    dataHandler.getAllCustomers(loadCustomerDataCallback);
-}
-
-function loadCustomerDataCallback(error, data) {
-    if (error) throw error;
-    //sortData(data, "ID");
-    customerData = data;
-    printAllCustomers();
-    setEditButtonHandlers();
-}
 
 /*
 function loadSingleCustomer(id) {
@@ -146,9 +270,10 @@ function setEditButtonHandlers() {
     });
 }
 
-function setButtonHandlers() {
+function setButtonHandlersOld() {
     $("#btn-newcustomer").on("click", function () {
-        showEditModal(-1);
+        //showEditModal(-1);
+        saveCustomerData();
     });
     $("#btn-cust-edit").on("click", function () {
         toggleEditMode(-1);
@@ -197,7 +322,7 @@ function toggleEditMode(value) {
     }
 }
 
-function saveCustomerData() {
+function saveCustomerDataOld() {
     if (currentCustomer == null) {
         currentCustomer = {};
         currentCustomer.ID = "" + (getMaxCustomerID() + 1);

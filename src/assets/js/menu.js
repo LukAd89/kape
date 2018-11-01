@@ -45,9 +45,9 @@ function loadData(){
 }
 
 function setMenuButtonHandlers(){
-    $(".nav .nav-link").each(function() {
+    $("#menu-nav .nav-link").each(function() {
         $(this).on("click", function(){
-            $(".nav").find(".active").removeClass("active");
+            $("#menu-nav").find(".active").removeClass("active");
             $(this).addClass("active");
 
             hideAllSections();

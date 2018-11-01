@@ -39,25 +39,87 @@ module.exports.getBoxesCount = async () => {
             }
         })
     })
-    /*
-    dbBoxes.count({}, (err, count) => {
-        if(err) throw err;
-        console.log("s::" + count);
-        return count;
+}
+
+module.exports.getCustomers = (ids) => {
+    return new Promise(function (resolve, reject) {
+        if(ids){
+            dbCustomers.find({_id: {$in: ids}}).sort({lastname:1}).exec(function (err, docs) {
+                if(err) reject(err)
+                resolve(docs)
+            })
+        }
+        dbCustomers.find({}).sort({lastname:1}).exec(function (err, docs) {
+            if(err) reject(err)
+            resolve(docs)
+        })
     })
-    */
 }
 
-module.exports.getAllCustomers = () => {
-
+module.exports.insertCustomer = (data) => {
+    
+    return new Promise(function (resolve, reject) {
+        dbCustomers.insert(data, function (err, newdoc) {
+            if(err) reject(err)
+            resolve(newdoc)
+        })
+    })
 }
-module.exports.setAllCustomers = () => {
 
+module.exports.updateCustomer = (data) => {
+    
+    return new Promise(function (resolve, reject) {
+        dbCustomers.update({_id:data._id}, data, {}, function (err, numAffected) {
+            if(err) reject(err)
+            resolve(numAffected)
+        })
+    })
 }
 
-module.exports.setAllBoxes = () => {
-
+module.exports.getCats = (ids) => {
+    return new Promise(function (resolve, reject) {
+        if(ids){
+            dbCats.find({_id: {$in: ids}}).sort({_id:1}).exec(function (err, docs) {
+                if(err) reject(err)
+                resolve(docs)
+            })
+        }
+        dbCats.find({}).sort({_id:1}).exec(function (err, docs) {
+            if(err) reject(err)
+            resolve(docs)
+        })
+    })
 }
+
+module.exports.getCatsByOwnerid = (owner) => {
+    return new Promise(function (resolve, reject) {
+        dbCats.find({ownerid:owner}).sort({num:1}).exec(function (err, docs) {
+            if(err) reject(err)
+            resolve(docs)
+        })
+    })
+}
+
+module.exports.insertCat = (data) => {
+    
+    return new Promise(function (resolve, reject) {
+        dbCats.insert(data, function (err, newdoc) {
+            if(err) reject(err)
+            resolve(newdoc)
+        })
+    })
+}
+
+module.exports.updateCat = (data) => {
+    
+    return new Promise(function (resolve, reject) {
+        dbCats.update({_id:data._id}, data, {}, function (err, numAffected) {
+            if(err) reject(err)
+            resolve(numAffected)
+        })
+    })
+}
+
 module.exports.getAllBookings = () => {
 
 }
