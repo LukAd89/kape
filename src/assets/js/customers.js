@@ -9,14 +9,12 @@ $(function () {
 });
 
 const init = async () => {
+    $("#customer-edit").hide();
     var customerData = await database.getCustomers();
     //var customerData = [{_id:0, prename:'lukas', lastname:'adrian'},{_id:1, prename:'bianca', lastname:'mielach'}]
     await printCustomers(customerData);
-    //$("#customer-edit").hide();
-    setEditNavbarHandler();
     setButtonHandlers();
 
-    $('#customer-edit-cat .card-body').html($('script[data-template="catform"]').html());
     /*
     printAllCustomers();
     setEditButtonHandlers();
@@ -36,7 +34,7 @@ const printCustomers = async (customerData) => {
             catString += (tempCats[j].name || "");
         }
 
-        tableBody += "<tr><td onclick=alert('" + tempCustomer._id + "')>" + (tempCustomer.prename || "") +
+        tableBody += '<tr class="customer-table-row" data-id="' +  tempCustomer._id + '"><td>' + (tempCustomer.prename || "") +
             "</td><td>" + (tempCustomer.lastname || "") + 
             "</td><td>" + (tempCustomer.adress || "") +  (tempCustomer.zip || "") +  (tempCustomer.city || "") + 
             "</td><td>" + catString + 
@@ -45,80 +43,78 @@ const printCustomers = async (customerData) => {
     $('#customer-table tbody').html(tableBody);
 };
 
-const setEditNavbarHandler = () =>{
-    $("#customer-edit .page-item").each(function() {
-        $(this).on("click", function(){
-            $("#customer-edit-" + $(this).parent().find(".active a").data("page")).hide();
-            $(this).parent().find(".active").removeClass("active");
-            $(this).addClass("active");
-            $("#customer-edit-" + $(this).parent().find(".active a").data("page")).show();
-            //$(".nav").find(".active").removeClass("active");
-            //$(this).addClass("active");
-
-            //hideAllSections();
-            //showSection($(this).attr("data-section"));
-        });
-    });
-}
-
 const saveCustomerData = async () => {
     var formData = await $('#form-customer').serializeArray();
     var newCustomerData = {};
-    var newCat1Data = {};
-    var newCat2Data = {};
-    var newCat3Data = {};
+    var newCatData = [];
 
     $(formData).each(function(index, obj){
         if(obj.name !== "_id" || obj.value !== "")
             newCustomerData[obj.name] = obj.value;
     });
 
-    formData = $('#form-cat1').serializeArray();
-    $(formData).each(function(index, obj){
-        if(obj.name !== "_id" || obj.value !== "")
-            newCat1Data[obj.name] = obj.value;
+    $('#customer-edit-cat .form-cat').each(function(catindex){
+        formData = $(this).serializeArray();
+        newCatData.push({});
+        $(formData).each(function(attrindex, obj){
+            if(obj.name !== "_id" || obj.value !== "")
+                newCatData[catindex][obj.name] = obj.value;
+        });
     });
-
-    formData = $('#form-cat2').serializeArray();
-    $(formData).each(function(index, obj){
-        if(obj.name !== "_id" || obj.value !== "")
-            newCat2Data[obj.name] = obj.value;
-    });
-
-    formData = $('#form-cat3').serializeArray();
-    $(formData).each(function(index, obj){
-        if(obj.name !== "_id" || obj.value !== "")
-            newCat3Data[obj.name] = obj.value;
-    });
-
+    
     if(newCustomerData._id){
         await database.updateCustomer(newCustomerData);
-        await database.updateCat(newCat1Data);
-        await database.updateCat(newCat2Data);
-        await database.updateCat(newCat3Data);
+        $.each(newCatData, async function(index, obj){
+            newCatData[index].ownerid = newCustomerData._id;
+            if(newCatData[index]._id){
+                await database.updateCat(obj);
+            } else{
+                await database.insertCat(obj);
+            }
+        });
     } else {
         var newID = (await database.insertCustomer(newCustomerData))._id;
-        newCat1Data.ownerid = newID;
-        await database.insertCat(newCat1Data);
-        newCat1Data.ownerid = newID;
-        await database.insertCat(newCat2Data);
-        newCat1Data.ownerid = newID;
-        await database.insertCat(newCat3Data);
+        $.each(newCatData, async function(index, obj){
+            newCatData[index].ownerid = newID;
+            await database.insertCat(newCatData[index]);
+        });
     }
+    
 }
 
 const selectCatForm = (id) => {
-    alert(id);
+    $('#btn-group-cats .active').removeClass('active');
+    $('#btn-group-cats button[data-id="' + id + '"]').addClass('active');
 }
 
 const setButtonHandlers = () => {
+    //New Customer
     $("#btn-newcustomer").on("click", function () {
-        //showEditModal(-1);
+        $('#cust-table').hide();
+        $('#customer-edit-cat .card-body').append(catFormTemplate(0));
+        $('#customer-edit').show();
+        setFormHandlers();
+    });
+
+    //Edit customer
+    $('.customer-table-row').on("click", function () {
+        //alert($(this).data('id'))
+        $('#cust-table').hide();
+        fillCustomerForm($(this).data('id'));
+        $('#customer-edit').show();
+    });
+
+    $('#btn-form-save').on("click", function () {
         saveCustomerData();
     });
 
+    $('#btn-form-cancel').on("click", function () {
+        $('#customer-edit').hide();
+        $('#cust-table').show();
+    });
+
     $("#btn-cat-delete").on("click", function () {
-        if (confirm('Katze löschen?')) {
+        if (confirm('Katze "' + $('#btn-group-cats .active').text() + '" löschen?')) {
             if($('#btn-group-cats').children().length > 1){
                 $('#btn-group-cats .active').remove();
                 selectCatForm($('#btn-group-cats').children().first().data("id"));
@@ -127,7 +123,7 @@ const setButtonHandlers = () => {
     });
 
     $("#btn-cat-add").on("click", function () {
-        if($('#btn-group-cats').children().length > 6 || $('#btn-group-cats').children().last().data('id') === '0'){
+        if($('#btn-group-cats').children().length > 6 || $('#btn-group-cats').children().last().data('id') == 0){
             return;
         }
         $('#btn-group-cats').append($('<button/>',
@@ -136,21 +132,68 @@ const setButtonHandlers = () => {
                 type: 'button',
                 class: 'btn btn-outline-dark',
                 click: function () {
-                        $('#btn-group-cats .active').removeClass('active');
                         selectCatForm($(this).data('id'));
-                        $(this).addClass('active');
                     },
-                data: {id: '0'}
+                attr: {"data-id": 0},
+                data: {id: 0}
             }
         ));
+        selectCatForm(0);
     });
 
     $('#btn-group-cats button').on("click", function () {
-        $('#btn-group-cats .active').removeClass('active');
         selectCatForm($(this).data('id'));
-        $(this).addClass('active');
     });
 }
+
+const fillCustomerForm = async (id) => {
+    var tempCustomerData = (await database.getCustomers(id))[0];
+    var tempCatData = await database.getCatsByOwnerid(tempCustomerData._id);
+
+    populateForm($('#form-customer'), tempCustomerData);
+
+    for(var i=0; i<tempCatData.length; i++){
+        populateForm($('#'), tempCatData[i]);
+    }
+}
+
+const populateForm = (frm, data) => {  
+    $.each(data, function(key, value) {  
+        console.log(key);
+        console.log(value);
+        var ctrl = $('[name='+key+']', frm); 
+        switch(ctrl.prop("type")) { 
+            case "radio": case "checkbox":   
+                ctrl.each(function() {
+                    if($(this).attr('value') == value) $(this).attr("checked",value);
+                });   
+                break;  
+            default:
+                ctrl.val(value); 
+        } 
+    });  
+}
+
+const catFormTemplate = (id) => {
+    var $item = $($('script[data-template="catform"]').html());
+    $item.children('form').prop('id', 'form-cat-' + id);
+    return $item.children('form').first();
+    return $('script[data-template="catform"]').prop('id', 'form-cat-' + id).html();
+}
+
+const setFormHandlers = () => {
+    $('#frm-cust-phone').mask('(00000) #');
+    $('#frm-cust-mobile').mask('0000 - #');
+    $('#frm-cust-zip').mask('00000');
+    $('#frm-cat-birthday').mask('00.00.0000');
+    $('#frm-cat-birthday').datepicker({
+        showOtherMonths: true,
+        selectOtherMonths: true,
+        dateFormat: "dd.mm.yy"
+    });
+}
+
+//////////////////////////////////////////////// OLD /////////////////////////////////////////////
 
 /*function printAllCustomers(data) {
     document.getElementById("div1").innerHTML += data.customers[0];

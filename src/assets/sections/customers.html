@@ -1,14 +1,14 @@
 <template class="section-template">
     <section id="section-customers" class="section">
-        <h2>Kunden</h2>
         <div id="cust-table" class="table-responsive">
+            <h2>Kunden</h2>
             <button id="btn-newcustomer" text-align="center" class="btn btn-outline-secondary">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="green" version="1.1" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12,2C6.477,2,2,6.477,2,12s4.477,10,10,10s10-4.477,10-10S17.523,2,12,2z M17,13h-4v4h-2v-4H7v-2h4V7h2v4h4V13z" /></svg>
                 Neuer Kunde
             </button>
             <br><br>
-            <table id='customer-table' class="table table-striped table-sm">
+            <table id='customer-table' class="table table-striped table-sm table-hover">
                 <thead>
                     <tr>
                         <th data-field='prename'>Vorname</th>
@@ -24,10 +24,13 @@
         </div>
 
         <div id="customer-edit">
-            <button id="btn-cust-edit" class="btn btn-secondary">Bearbeiten</button>
-            <button id="btn-cust-save" class="btn btn-success">Speichern</button>
-            <button id="btn-cust-cancel" class="btn btn-danger">Abbrechen</button>
-
+            <div class="w-100 sticky-top bg-white" style="top:48px">
+                <h2>Neuer Kunde</h2>
+                <button id="btn-form-save" class="btn btn-success">Speichern</button>
+                <button id="btn-form-cancel" class="btn btn-danger">Abbrechen</button>
+                <hr>
+            </div>
+            <br>
             <div class="card" id="customer-edit-customer">
                 <div class="card-header">
                     <h5>Kundendaten</h5>
@@ -64,7 +67,7 @@
                         <div class="form-row">
                             <div class="form-group col-md-3">
                                 <label for="frm-cust-zip">PLZ</label>
-                                <input type="number" class="form-control" id="frm-cust-zip" name="zip">
+                                <input type="text" class="form-control" id="frm-cust-zip" name="zip">
                             </div>
                             <div class="form-group col-md-3">
                                 <label for="frm-cust-city">Ort</label>
@@ -85,18 +88,19 @@
                 </div>
             </div>
 
+            <br><br>
+
             <div class="card" id="customer-edit-cat">
                 <div class="card-header">
                     <h5>Katzen</h5>
                     <button type="button" class="btn btn-outline-light">Neue Katze</button>
                     <div class="btn-toolbar" role="toolbar">
                         <div class="btn-group mr-2" role="group">
-                            <button type="button" class="btn btn-outline-danger" id="btn-cat-delete">x</button>
-                            <button type="button" class="btn btn-outline-dark" id="btn-cat-add">+</button>
+                            <button type="button" class="btn btn-outline-danger" id="btn-cat-delete"><span class="ui-icon ui-icon-minusthick"></span></button>
+                            <button type="button" class="btn btn-outline-success" id="btn-cat-add"><span class="ui-icon ui-icon-plusthick"></span></button>
                         </div>
                         <div class="btn-group mr-2" role="group" id="btn-group-cats">
-                            <button type="button" class="btn btn-outline-dark active" data-id="1">Katze 1</button>
-                            <button type="button" class="btn btn-outline-dark" data-id="2">Katze 2</button>
+                            <button type="button" class="btn btn-outline-dark active" data-id="0">Neue Katze</button>
                         </div>
                         <div class="btn-group mr-2" role="group">
 
@@ -108,24 +112,29 @@
                 </div>
             </div>
         </div>
-
+        <br>
 
         <!-- CAT FORM TEMPLATE -->
         <script type="text/template" data-template="catform">
-            <form id="form-cat">
+            <div>
+            <form id="form-cat-" class="form-cat">
+                <input type="hidden" name="_id">
+                <input type="hidden" name="ownerid">
                 <div class="form-row">
                     <div class="form-group col-md-4">
                         <label for="frm-cat-name">Name</label>
-                        <input type="text" class="form-control" id="frm-cat-name" placeholder="">
+                        <input type="text" class="form-control" id="frm-cat-name" placeholder="" name="name">
                     </div>
                     <div class="form-group col-md-4">
                         <label for="frm-cat-race">Rasse</label>
-                        <input type="text" class="form-control" id="frm-cat-race" placeholder="">
+                        <input type="text" class="form-control" id="frm-cat-race" placeholder="" name="race">
                     </div>
                     <div class="form-group col-md-4">
                         <label for="frm-cat-birthday">Geburtstag</label>
-                        <input type="date" class="form-control" id="frm-cat-birthday" placeholder="">
+                        <input type="text" class="form-control" id="frm-cat-birthday" name="birthday">
                     </div>
+                </div>
+                <div class="form-row">
                     <div class="form-group col-md-4">
                         <label for="frm-cat-gender">Geschlecht</label>
                         <div id="frm-cat-gender">
@@ -166,6 +175,7 @@
                     </div>
                 </div>
             </form>
+        </div>
         </script>
 
         <script type="text/javascript">

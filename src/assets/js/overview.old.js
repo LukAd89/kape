@@ -1,97 +1,115 @@
-//var reservationData;
-//var boxesData;
-var maxDates = 10;
+var reservationData = [{"ID": "1", "name": "laura", "boxID": "101"},{"ID": "2", "name": "finchen", "boxID": "102"}];
 
 $(function () {
     init();
 });
 
-function init() {
-    document.getElementById("bookings-preview-startdate").valueAsDate = new Date();
-    //loadBoxesData();
-    //loadreservationData();
-    formatTableHeader();
-    printBookingsPreview();
-    setButtonHandlers();
+const init = async () => {
+    await setBoxsizes();
+    await fillCardsWithReservations();
+    await fillCardsWithEmptySlots();
+    await setDragzoneHandlers();
+    await setDropzoneHandlers();
 }
 
-function formatTableHeader() {
-    $("#overview-table-head").html("");
+const setBoxsizes = async () => {
+    var boxes = await database.getBoxes();
 
-    var date = document.getElementById("bookings-preview-startdate").valueAsDate;
-    var tableHeader = "<tr><th>Box-Nr.</th>";
-
-    for (var i = 0; i < maxDates; i++) {
-        tableHeader += "<th>" + date.getDate() + "." + (date.getMonth() + 1) + ".</th>";
-        date.setTime(date.getTime() + 86400000);
+    for(var i=0; i<boxes.length; i++){
+        $('#boxlist' + boxes[i]._id).data('size', boxes[i].size);
     }
-
-    tableHeader += "</tr>";
-
-    $("#overview-table-head").append(tableHeader);
 }
 
-function loadreservationData() {
-    dataHandler.getAllBookings(loadreservationDataCallback);
+const fillCardsWithReservations = () => {
+    var dropzones = $('.dropzone');
+
+    dropzones.empty();
+
+    for(var i=0; i<reservationData.length; i++){
+        var reservation = reservationData[i];
+        var catSlot = '<li class="list-group-item">' + reservationSlot(reservation) + '</li>';
+        $('#boxlist' + reservation.boxID).append(catSlot);
+    }
 }
 
-function loadreservationDataCallback(error, data) {
-    if (error) throw error;
-    sortData(data, "dateCheckin");
-    reservationData = data;
-    printBookingsPreview();
-}
+const fillCardsWithEmptySlots = () => {
+    var emptyslot = '<li class="list-group-item"><div class="emptyslot">leer</div></li>';
 
-function loadBoxesData() {
-    dataHandler.getAllBoxes(loadBoxesDataCallback);
-}
-
-function loadBoxesDataCallback(error, data) {
-    if (error) throw error;
-    boxesData = data;
-    loadreservationData();
-}
-
-function sortData(data, key) {
-    data.sort(function (a, b) {
-        return a[key].localeCompare(b[key]);
-    });
-    return data;
-}
-
-function printBookingsPreview() {
-    $("#overview-table-body").html("");
-
-    var tableBody = "";
-    /*
-    for (var i = 1; i <= boxesData.length; i++) {
-        tableBody += "<tr><td>" + (i) + "</td>";
-        for (var j = 0; j < maxDates; j++) {
-            tableBody += "<td ";
-            currentDate = new Date();
-            currentDate = new Date($("#bookings-preview-startdate").val());
-            currentDate.setTime(currentDate.getTime() + j * 86400000);
-
-            var boxOccupancy = "class='table-success'>";
-            for (var k = 0; k < reservationData.length; k++) {
-                if (reservationData[k].boxID == i && new Date(reservationData[k].dateCheckin) <= currentDate && new Date(reservationData[k].dateCheckout) >= currentDate) {
-                    boxOccupancy = "class='table-danger'>";
-                }
-            }
-            tableBody += boxOccupancy + "</td>";
+    $('.dropzone').each(function(){
+        for(var j=$(this).children('li').length; j<$(this).data('size'); j++){
+            $(this).append(emptyslot)
         }
-        tableBody += "</tr>";
-    }
-    */
-    $("#overview-table-body").append(tableBody);
+    });
 }
 
-function setButtonHandlers() {
-    $("#btn-bookings-preview-refresh").on("click", function () {
-        var date = document.getElementById("bookings-preview-startdate").valueAsDate;
-        if (!(date >= new Date()))
-            document.getElementById("bookings-preview-startdate").valueAsDate = new Date();
-        formatTableHeader();
-        printBookingsPreview();
+const setDragzoneHandlers = () => {
+    $(".dragzone").on("dragstart", function(ev) {
+        ev.originalEvent.dataTransfer.setData("text", ev.originalEvent.target.id);
+        //$('.emptyslot').parent().css("background-color", "lightgreen");
+        $('.emptyslot').parents('.card').addClass("border-success");
+        //$('.emptyslot').parent().addClass("bg-success");
     });
+}
+
+const setDropzoneHandlers = () => {
+    $(".dropzone")
+        .on("dragenter", onDragEnter)
+        .on("dragover", onDragOver)
+        .on("dragleave", onDragLeave)
+        .on("drop", onDrop);
+}
+
+const onDrop = function(ev) {
+    ev.preventDefault();
+    //$('.emptyslot').parent().css("background-color", "");
+    $('.emptyslot').parents('.card').removeClass("border-success");
+
+    //ev.originalEvent.target.appendChild(document.getElementById(data));
+
+    var dragID = ev.originalEvent.dataTransfer.getData("text");
+
+    if(!$('#' + dragID).hasClass('dragzone')){
+        console.log("no valid drag");
+        return;
+    }
+
+    var targetDropUL = $(ev.originalEvent.target).closest('ul');
+    $('#' + dragID).parent().append('<div class="emptyslot">leer</div>');
+    $('#' + dragID).parent().appendTo($('#' + dragID).parent().parent());
+    $('#' + dragID).appendTo(targetDropUL.find('li').has('.emptyslot').first());
+    targetDropUL.find('div.emptyslot').first().remove();
+
+    return;
+
+    if($(ev.originalEvent.target).hasClass('dropzone')){
+        console.log("JOO");
+        $('#' + dragID).appendTo($('#' + dropID));
+    }else {
+        //$('#' + dragID).appendTo($('.dropzone li').has('.emptyslot').first());
+        $('#' + dragID).parent().append('<div class="emptyslot">leer</div>');
+        $('#' + dragID).parent().appendTo($('#' + dragID).parent().parent());
+        $('#' + dragID).appendTo($('#' + dropID).parent().parent().find('li').has('.emptyslot').first());
+        $('#' + dropID).parent().parent().find('div.emptyslot').first().remove();
+        //$('.dropzone li .e').has('.emptyslot').first().remove();
+        //$('#' + dragID).appendTo($('.dropzone').has('#' + dropID));
+    }
+
+
+};
+
+const onDragOver = function(ev) {
+    ev.preventDefault(); 
+};
+
+const onDragEnter = function(ev) {
+    ev.preventDefault();
+};
+
+const onDragLeave = function(ev) {
+    ev.preventDefault();
+    //$(ev.originalEvent.target).closest('ul').find('.emptyslot').parent().removeClass("border-success");
+    //$('.emptyslot').parent().removeClass("bg-success");
+};
+const reservationSlot = (reservation) => {
+    return '<div id="' + reservation.ID + '" class="dragzone" draggable="true">' + reservation.name + '</div>';
 }

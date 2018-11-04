@@ -33,8 +33,6 @@ const fillCardsWithReservations = () => {
 }
 
 const fillCardsWithEmptySlots = () => {
-    var emptyslot = '<li class="list-group-item"><div class="emptyslot">leer</div></li>';
-
     $('.dropzone').each(function(){
         for(var j=$(this).children('li').length; j<$(this).data('size'); j++){
             $(this).append(emptyslot)
@@ -43,71 +41,42 @@ const fillCardsWithEmptySlots = () => {
 }
 
 const setDragzoneHandlers = () => {
-    $(".dragzone").on("dragstart", function(ev) {
-        ev.originalEvent.dataTransfer.setData("text", ev.originalEvent.target.id);
-        $('.emptyslot').parent().css("background-color", "lightgreen");
-        //$('.emptyslot').parent().addClass("bg-success");
+    $('.dragzone').draggable({
+        revert: "invalid", 
+        opacity: 0.7,
+        helper: "clone", 
+        cursor: "move", 
+        cursorAt: {  },
+        zIndex: 500
+        //stack: ".dragzone"
     });
 }
 
 const setDropzoneHandlers = () => {
-    $(".dropzone")
-        .on("dragenter", onDragEnter)
-        .on("dragover", onDragOver)
-        .on("dragleave", onDragLeave)
-        .on("drop", onDrop);
+    $(".dropzone").droppable({
+        accepts: ".dragzone",
+        classes: {
+            "ui-droppable-active": "custom-state-active",
+            "ui-droppable-hover": "custom-state-hover"
+          },
+        drop: function(event, ui){
+            moveDragItem(ui.draggable, this.id);
+        }
+    });
 }
 
-const onDrop = function(ev) {
-    ev.preventDefault();
-    $('.emptyslot').parent().css("background-color", "");
+const moveDragItem = ($item, id) => {
+    //$item.parent().parent().append(emptyslot);
+    //$item.parent().appendTo($item.parent().parent());
+    $item.parent().addClass('emptyslot');
+    $item.parent().appendTo($item.parent().parent())
+    $item.appendTo($('#' + id + ' li.emptyslot').first());
+    //$('#' + id).find('div.emptyslot').first().remove();
+    $item.parent().removeClass('emptyslot');
+}
 
-    //ev.originalEvent.target.appendChild(document.getElementById(data));
+const emptyslot = '<li class="list-group-item emptyslot"></li>';
 
-    var dragID = ev.originalEvent.dataTransfer.getData("text");
-
-    if(!$('#' + dragID).hasClass('dragzone')){
-        console.log("no valid drag");
-        return;
-    }
-
-    var targetDropUL = $(ev.originalEvent.target).closest('ul');
-    $('#' + dragID).parent().append('<div class="emptyslot">leer</div>');
-    $('#' + dragID).parent().appendTo($('#' + dragID).parent().parent());
-    $('#' + dragID).appendTo(targetDropUL.find('li').has('.emptyslot').first());
-    targetDropUL.find('div.emptyslot').first().remove();
-
-    return;
-
-    if($(ev.originalEvent.target).hasClass('dropzone')){
-        console.log("JOO");
-        $('#' + dragID).appendTo($('#' + dropID));
-    }else {
-        //$('#' + dragID).appendTo($('.dropzone li').has('.emptyslot').first());
-        $('#' + dragID).parent().append('<div class="emptyslot">leer</div>');
-        $('#' + dragID).parent().appendTo($('#' + dragID).parent().parent());
-        $('#' + dragID).appendTo($('#' + dropID).parent().parent().find('li').has('.emptyslot').first());
-        $('#' + dropID).parent().parent().find('div.emptyslot').first().remove();
-        //$('.dropzone li .e').has('.emptyslot').first().remove();
-        //$('#' + dragID).appendTo($('.dropzone').has('#' + dropID));
-    }
-
-
-};
-
-const onDragOver = function(ev) {
-    ev.preventDefault(); 
-};
-
-const onDragEnter = function(ev) {
-    ev.preventDefault();
-};
-
-const onDragLeave = function(ev) {
-    ev.preventDefault();
-    //$(ev.originalEvent.target).closest('ul').find('.emptyslot').parent().removeClass("border-success");
-    //$('.emptyslot').parent().removeClass("bg-success");
-};
 const reservationSlot = (reservation) => {
-    return '<div id="' + reservation.ID + '" class="dragzone" draggable="true">' + reservation.name + '</div>';
+    return '<div id="' + reservation.ID + '" class="dragzone alert alert-secondary"><b>' + reservation.name + '<b><b>11.05.2018 - 17.05.2018</b></div>';
 }

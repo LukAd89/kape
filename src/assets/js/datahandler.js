@@ -44,10 +44,17 @@ module.exports.getBoxesCount = async () => {
 module.exports.getCustomers = (ids) => {
     return new Promise(function (resolve, reject) {
         if(ids){
-            dbCustomers.find({_id: {$in: ids}}).sort({lastname:1}).exec(function (err, docs) {
-                if(err) reject(err)
-                resolve(docs)
-            })
+            if(!$.isArray(ids)){
+                dbCustomers.find({_id:ids}, function (err, docs) {
+                    if(err) reject(err)
+                    resolve(docs)
+                })
+            } else{
+                dbCustomers.find({_id: {$in: ids}}).sort({lastname:1}).exec(function (err, docs) {
+                    if(err) reject(err)
+                    resolve(docs)
+                })
+            }
         }
         dbCustomers.find({}).sort({lastname:1}).exec(function (err, docs) {
             if(err) reject(err)
@@ -79,10 +86,17 @@ module.exports.updateCustomer = (data) => {
 module.exports.getCats = (ids) => {
     return new Promise(function (resolve, reject) {
         if(ids){
-            dbCats.find({_id: {$in: ids}}).sort({_id:1}).exec(function (err, docs) {
-                if(err) reject(err)
-                resolve(docs)
-            })
+            if(!$.isArray(ids)){
+                dbCats.find({_id:ids}, function (err, docs) {
+                    if(err) reject(err)
+                    resolve(docs)
+                })
+            } else{
+                dbCats.find({_id: {$in: ids}}).sort({_id:1}).exec(function (err, docs) {
+                    if(err) reject(err)
+                    resolve(docs)
+                })
+            }
         }
         dbCats.find({}).sort({_id:1}).exec(function (err, docs) {
             if(err) reject(err)

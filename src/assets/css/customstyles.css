@@ -120,3 +120,22 @@ body {
 .dropzone{
   min-height: 50px;
 }
+
+.dropzone li{
+  padding: .2rem .2rem;
+  min-height: 3.9rem;
+}
+
+.dragzone{
+  padding: .2rem .4rem;
+  margin: 0;
+  min-height: 3.5rem;
+}
+
+.custom-state-active .emptyslot {
+  background: #eee;
+}
+
+.custom-state-hover .emptyslot {
+  background: #007bff;
+}
