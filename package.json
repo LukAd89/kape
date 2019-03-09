@@ -20,6 +20,9 @@
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
+          "platforms": [
+            "darwin"
+          ],
           "config": {
             "name": "katzenpension_nedb"
           }
@@ -27,7 +30,8 @@
         {
           "name": "@electron-forge/maker-zip",
           "platforms": [
-            "darwin"
+            "darwin",
+            "win32"
           ]
         }
       ]

@@ -25,9 +25,10 @@
 
         <div id="customer-edit">
             <div class="w-100 sticky-top bg-white" style="top:48px">
-                <h2>Neuer Kunde</h2>
+                <h2 id="customer-edit-header">Neuer Kunde</h2>
                 <button id="btn-form-save" class="btn btn-success">Speichern</button>
-                <button id="btn-form-cancel" class="btn btn-danger">Abbrechen</button>
+                <button id="btn-form-cancel" class="btn btn-secondary">Abbrechen</button>
+                <button id="btn-form-delete" class="btn btn-danger">Löschen</button>
                 <hr>
             </div>
             <br>
@@ -93,14 +94,13 @@
             <div class="card" id="customer-edit-cat">
                 <div class="card-header">
                     <h5>Katzen</h5>
-                    <button type="button" class="btn btn-outline-light">Neue Katze</button>
                     <div class="btn-toolbar" role="toolbar">
                         <div class="btn-group mr-2" role="group">
                             <button type="button" class="btn btn-outline-danger" id="btn-cat-delete"><span class="ui-icon ui-icon-minusthick"></span></button>
                             <button type="button" class="btn btn-outline-success" id="btn-cat-add"><span class="ui-icon ui-icon-plusthick"></span></button>
                         </div>
                         <div class="btn-group mr-2" role="group" id="btn-group-cats">
-                            <button type="button" class="btn btn-outline-dark active" data-id="0">Neue Katze</button>
+                            <!-- Buttons für alle Katzen im Edit Modus -->
                         </div>
                         <div class="btn-group mr-2" role="group">
 
@@ -108,7 +108,7 @@
                     </div>
                 </div>
                 <div class="card-body">
-
+                    <!-- Inhalt aller Katzen im Edit Modus -->
                 </div>
             </div>
         </div>
@@ -139,11 +139,11 @@
                         <label for="frm-cat-gender">Geschlecht</label>
                         <div id="frm-cat-gender">
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="radio-gender" id="frm-cat-gender1" value="male">
+                                <input class="form-check-input" type="radio" name="gender" id="frm-cat-gender1" value="male">
                                 <label class="form-check-label" for="frm-cat-gender1">m&auml;nnlich</label>
                             </div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="radio-gender" id="frm-cat-gender2" value="female">
+                                <input class="form-check-input" type="radio" name="gender" id="frm-cat-gender2" value="female">
                                 <label class="form-check-label" for="frm-cat-gender2">weiblich</label>
                             </div>
                         </div>
@@ -152,11 +152,11 @@
                         <label for="frm-cat-attr">Merkmale</label>
                         <div id="frm-cat-attr">
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="frm-cat-cast" value="kastriert">
+                                <input class="form-check-input" type="checkbox" id="frm-cat-cast" name="castrated" value="castrated">
                                 <label class="form-check-label" for="frm-cat-cast">Kastriert</label>
                             </div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="frm-cat-single" value="einzeln">
+                                <input class="form-check-input" type="checkbox" id="frm-cat-single" name="incompatible" value="incompatible">
                                 <label class="form-check-label" for="frm-cat-single">Unvertr&auml;glich</label>
                             </div>
                         </div>
@@ -165,13 +165,13 @@
                 <div class="form-row">
                     <div class="form-group col-md-12">
                         <label for="frm-cat-medics">Krankheiten</label>
-                        <textarea type="textarea" class="form-control" id="frm-cat-medics" rows="4"></textarea>
+                        <textarea type="textarea" class="form-control" id="frm-cat-medics" rows="4" name="medics"></textarea>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group col-md-12">
                         <label for="frm-cat-misc">Anmerkungen</label>
-                        <textarea type="textarea" class="form-control" id="frm-cat-misc" rows="4"></textarea>
+                        <textarea type="textarea" class="form-control" id="frm-cat-misc" rows="4" name="misc"></textarea>
                     </div>
                 </div>
             </form>

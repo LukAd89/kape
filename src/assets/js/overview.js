@@ -1,4 +1,5 @@
-var reservationData = [{"ID": "1", "name": "laura", "boxID": "101"},{"ID": "2", "name": "finchen", "boxID": "102"}];
+//var reservationData = [{"ID": "1", "name": "laura", "boxID": "101", "color": "#b1b1d5"},{"ID": "2", "name": "finchen", "boxID": "102", "color": "#b1b1d5"}];
+let reservationData;
 
 $(function () {
     init();
@@ -6,6 +7,7 @@ $(function () {
 
 const init = async () => {
     await setBoxsizes();
+    reservationData = await database.getCurrentReservations();
     await fillCardsWithReservations();
     await fillCardsWithEmptySlots();
     await setDragzoneHandlers();
@@ -20,15 +22,17 @@ const setBoxsizes = async () => {
     }
 }
 
-const fillCardsWithReservations = () => {
+const fillCardsWithReservations = async () => {
     var dropzones = $('.dropzone');
 
     dropzones.empty();
 
     for(var i=0; i<reservationData.length; i++){
+        console.log("RES", JSON.stringify(reservationData))
         var reservation = reservationData[i];
-        var catSlot = '<li class="list-group-item">' + reservationSlot(reservation) + '</li>';
-        $('#boxlist' + reservation.boxID).append(catSlot);
+        var catSlot = '<li class="list-group-item">' + await reservationSlot(reservation) + '</li>';
+        console.log("CATSLOT", catSlot)
+        $('#boxlist' + reservation.boxid).append(catSlot);
     }
 }
 
@@ -68,15 +72,36 @@ const setDropzoneHandlers = () => {
 const moveDragItem = ($item, id) => {
     //$item.parent().parent().append(emptyslot);
     //$item.parent().appendTo($item.parent().parent());
+    console.log("MOVE", $item.prop('id'));
     $item.parent().addClass('emptyslot');
     $item.parent().appendTo($item.parent().parent())
+    
+    if(id === 'boxlist0'){
+        $('#' + id).append(emptyslot);
+    }
     $item.appendTo($('#' + id + ' li.emptyslot').first());
+    
     //$('#' + id).find('div.emptyslot').first().remove();
     $item.parent().removeClass('emptyslot');
+    $('#boxlist0 li.emptyslot').remove();
+
+    database.updateReservationBox($item.prop('id'), id.replace("boxlist",""));
 }
 
 const emptyslot = '<li class="list-group-item emptyslot"></li>';
 
-const reservationSlot = (reservation) => {
-    return '<div id="' + reservation.ID + '" class="dragzone alert alert-secondary"><b>' + reservation.name + '<b><b>11.05.2018 - 17.05.2018</b></div>';
+const reservationSlot = async (reservation) => {
+    let resCat = (await database.getCats(reservation.catid))[0];
+    let returnString = '<div id="' + reservation._id + '" class="dragzone alert" style="background-color:blue;"><b>' + resCat.name + '</b><br>' + convertDateFormat(reservation.dateCheckin) + ' - ' + convertDateFormat(reservation.dateCheckout) + '</div>';
+    console.log("RESCAT", returnString);
+    return returnString;
+}
+
+const convertDateFormat = (dateString) => {
+    let date = new Date(dateString);
+    let d = date.getDate();
+    let m = date.getMonth()+1;
+    let y = date.getFullYear();
+
+    return d + "." + m + "." + y;
 }

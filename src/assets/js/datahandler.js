@@ -77,8 +77,20 @@ module.exports.updateCustomer = (data) => {
     
     return new Promise(function (resolve, reject) {
         dbCustomers.update({_id:data._id}, data, {}, function (err, numAffected) {
-            if(err) reject(err)
-            resolve(numAffected)
+            if(err) reject(err);
+            dbCustomers.persistence.compactDatafile();
+            resolve(numAffected);
+        })
+    })
+}
+
+module.exports.deleteCustomer = (id) => {
+    
+    return new Promise(function (resolve, reject) {
+        dbCustomers.remove({_id:id}, {}, function (err, numAffected) {
+            if(err) reject(err);
+            dbCustomers.persistence.compactDatafile();
+            resolve(numAffected);
         })
     })
 }
@@ -128,15 +140,97 @@ module.exports.updateCat = (data) => {
     
     return new Promise(function (resolve, reject) {
         dbCats.update({_id:data._id}, data, {}, function (err, numAffected) {
-            if(err) reject(err)
-            resolve(numAffected)
+            if(err) reject(err);
+            dbCats.persistence.compactDatafile();
+            resolve(numAffected);
         })
     })
 }
 
-module.exports.getAllBookings = () => {
-
+module.exports.deleteCat = (id) => {
+    
+    return new Promise(function (resolve, reject) {
+        dbCats.remove({_id:id}, {}, function (err, numAffected) {
+            if(err) reject(err);
+            dbCats.persistence.compactDatafile();
+            resolve(numAffected);
+        })
+    })
 }
-module.exports.setAllBookings = () => {
 
+module.exports.deleteCatsFromOwner = (ownerid) => {
+    
+    return new Promise(function (resolve, reject) {
+        dbCats.remove({"ownerid": ownerid}, {multi: true}, function (err, numAffected) {
+            if(err) reject(err);
+            dbCats.persistence.compactDatafile();
+            resolve(numAffected);
+        })
+    })
+}
+
+module.exports.getReservations = (ids) => {
+    return new Promise(function (resolve, reject) {
+        if(ids){
+            if(!$.isArray(ids)){
+                dbReservations.find({_id:ids}, function (err, docs) {
+                    if(err) reject(err)
+                    resolve(docs)
+                })
+            } else{
+                dbReservations.find({_id: {$in: ids}}).sort({_id:1}).exec(function (err, docs) {
+                    if(err) reject(err)
+                    resolve(docs)
+                })
+            }
+        }
+        dbReservations.find({}).sort({_id:1}).exec(function (err, docs) {
+            if(err) reject(err)
+            resolve(docs)
+        })
+    });
+};
+
+module.exports.getCurrentReservations = () => {
+    let today = new Date();
+    today.setUTCHours(0,0,0,0);
+    today = today.toISOString();
+    
+    return new Promise(function (resolve, reject) {
+        dbReservations.find({dateCheckout: {$gte: today}}).sort({_id:1}).exec(function (err, docs) {
+            if(err) reject(err)
+            resolve(docs)
+        })
+    });
+};
+
+module.exports.insertReservation = (data) => {
+    return new Promise(function (resolve, reject) {
+        dbReservations.insert(data, function (err, newdoc) {
+            if(err) reject(err)
+            resolve(newdoc)
+        })
+    })
+};
+
+module.exports.deleteReservation = (id) => {
+    
+    return new Promise(function (resolve, reject) {
+        dbReservations.remove({_id:id}, {}, function (err, numAffected) {
+            if(err) reject(err);
+            dbReservations.persistence.compactDatafile();
+            resolve(numAffected);
+        })
+    })
+}
+
+module.exports.updateReservationBox = (reservationid, newboxid) => {
+    
+    return new Promise(function (resolve, reject) {
+        dbReservations.update({_id:reservationid}, { $set: { boxid: newboxid } }, {}, function (err, numAffected) {
+            if(err) reject(err);
+            dbReservations.persistence.compactDatafile();
+            resolve(numAffected);
+        })
+    })
 }

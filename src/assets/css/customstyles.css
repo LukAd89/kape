@@ -133,9 +133,17 @@ body {
 }
 
 .custom-state-active .emptyslot {
-  background: #eee;
+  background: #adddcf;
 }
 
 .custom-state-hover .emptyslot {
-  background: #007bff;
+  background: #777777;
+}
+
+#boxlist0.custom-state-active, #boxlist0.custom-state-active li{
+  background: #adddcf;
+}
+
+#boxlist0.custom-state-hover, #boxlist0.custom-state-hover li{
+  background: #777777;
 }
